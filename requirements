@@ -4,5 +4,5 @@ joblib
 folium
 streamlit-folium
 numpy
-scikit-learn
 gdown
+scikit-learn
