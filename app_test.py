@@ -16,7 +16,6 @@ st.set_page_config(layout="wide", page_title="AMLOE Web Platform", page_icon="ðŸ
 BASE_LAT = 2.927778
 BASE_LON = 101.785556
 
-
 def haversine(lat1, lon1, lat2, lon2):
     """Distance between points in meters."""
     R = 6371000
@@ -26,7 +25,6 @@ def haversine(lat1, lon1, lat2, lon2):
     a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-
 def calculate_bearing(lat1, lon1, lat2, lon2):
     """Calculates compass bearing (0-360) between two points."""
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
@@ -34,7 +32,6 @@ def calculate_bearing(lat1, lon1, lat2, lon2):
     y = math.sin(d_lambda) * math.cos(phi2)
     x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(d_lambda)
     return (math.degrees(math.atan2(y, x)) + 360) % 360
-
 
 def get_rsrp_color(rsrp):
     """Hex color mapping for RSRP levels."""
@@ -51,31 +48,31 @@ def get_rsrp_color(rsrp):
     else:
         return "#0000FF"  # Blue (No Signal)
 
-
 # --- Load Data and Model (Decoupled Storage Logic) ---
 @st.cache_resource
 def load_resources():
-    model_path = "rsrp_model.pkl"
+    # Use the compressed filename for better performance
+    model_path = "rsrp_model_compressed.pkl"
     csv_path = "5G_BS_UKM.csv"
 
+    # IMPORTANT: Update this ID with the ID of your COMPRESSED file
     file_id = '1U4hKKfedicyfJxvEXVV-uevY-B0SNesH'
     url = f'https://drive.google.com/uc?id={file_id}'
 
     try:
         if not os.path.exists(model_path):
-            with st.spinner("Downloading 4.5GB model from Google Drive... Please wait."):
-                # quiet=False allows you to see download progress in the logs
+            with st.spinner("Downloading compressed model from Google Drive..."):
                 gdown.download(url, model_path, quiet=False)
 
-        # 2. Load the CSV and the large Model
+        # 2. Load the CSV and the compressed Model
+        # joblib automatically detects the compression
         df = pd.read_csv(csv_path)
         model = joblib.load(model_path)
         return df, model
     except Exception as e:
         st.error(f"Initialization Error: {e}")
-        st.info("Check if the model file on Google Drive is shared with 'Anyone with the link'.")
+        st.info("Ensure the compressed file on Google Drive is shared with 'Anyone with the link'.")
         return None, None
-
 
 bs_df, model = load_resources()
 
@@ -139,7 +136,7 @@ with col2:
     # --- HEATMAP LOGIC ---
     if show_heatmap and model is not None:
         with st.spinner("Calculating area coverage grid..."):
-            grid_res = 20  # Reduced grid density slightly for performance
+            grid_res = 20
             span = 0.004
             lat_grid = np.linspace(lat0 - span, lat0 + span, grid_res)
             lon_grid = np.linspace(lon0 - span, lon0 + span, grid_res)
