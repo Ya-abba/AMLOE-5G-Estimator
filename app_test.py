@@ -58,7 +58,7 @@ def load_resources():
     model_path = "rsrp_model.pkl"
     csv_path = "5G_BS_UKM.csv"
 
-    file_id = '1U4hKKfedicyfJxvEXVV-uevY-B0SNesH/view?usp=sharing'
+    file_id = '1U4hKKfedicyfJxvEXVV-uevY-B0SNesH'
     url = f'https://drive.google.com/uc?id={file_id}'
 
     try:
